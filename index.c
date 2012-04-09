@@ -249,9 +249,16 @@ void entry_destroy(bag_elem_t e)
 void entry_print(bag_elem_t e)
 {
     entry_t *this_entry = e;
-    printf("%s", this_entry -> entry_word);
-    int i;
-    for(i = 0; i < MAX_PAGES; i++) if(this_entry -> location[i]) printf(" %d,", i);
+    printf("%s: ", this_entry -> entry_word);
+    int i,j;
+    //print the first entry
+    for(i = 0; i < MAX_PAGES; i++){
+        if(this_entry -> location[i]) printf(", %d", i);
+        break;
+    }
+    //print remaining entries, with commas after previous page number. For proper formatiing purposes.
+    for(j = i; j < MAX_PAGES; i++) if(this_entry -> location[i]) printf(", %d", j);
+    printf("\n");
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.  How to print an individual entry will  //
     //  depend completely on how you defined type entry_t, but the final      //
