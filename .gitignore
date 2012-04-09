@@ -1,5 +1,8 @@
-#project files
+# project files
 *.cbp*
 bin/*
 obj/*
+*.layout
+
+# system files
 .DS_Store
