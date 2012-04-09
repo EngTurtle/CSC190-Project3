@@ -40,11 +40,7 @@ typedef struct entry {
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
     char *entry_word;
-<<<<<<< HEAD
-    bool location[2048];
-=======
     bool location[MAX_PAGES];
->>>>>>> a759c6b8139f5a0551ceb5f38eb0403ca1785dbc
 } entry_t;
 
 /******************************************************************************
@@ -144,7 +140,7 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2);
  * Side-effects: none
  */
 static
-void entry_mod(bag_elem_t element, int page);
+void entry_mod(bag_elem_t *element, unsigned page);
 
 /******************************************************************************
  *  Function definitions -- see above for documentation.                      *
@@ -230,16 +226,18 @@ bag_t *generate_index(FILE *input, int min_word_len)
             // if the length of the word is long enough
             if(strlen(word) >= min_word_len)
             {
-                existing_entry = bag_contains(index, new_word);
+                existing_entry = bag_contains(index, &new_word);
                 // if the word is already in index
                 if(existing_entry != NULL)
                 {
-                    // add the location to the list of locations for that word
-
+                    entry_mod(existing_entry, page); // add the location to the list of locations for that word
                 }
                 // if the word isn't in the index
-                    // create the entry
-                    // add the location
+                else
+                {
+                    bag_elem_t new_entry = entry_create(word, page); // create the entry
+                    bag_insert(index, new_entry); // add the location
+                }
             }
         }
     }
