@@ -301,3 +301,9 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
 
     return stricmp(entry1->entry_word, entry2->entry_word);
 }
+
+void entry_mod(bag_elem_t *element, unsigned page)
+{
+    entry_t *mod = element;
+    mod -> location[page] = true;
+}
