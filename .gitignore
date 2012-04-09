@@ -3,6 +3,7 @@
 bin/*
 obj/*
 *.layout
+CSC190-Project3*
 
 # system files
 .DS_Store
