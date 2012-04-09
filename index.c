@@ -27,6 +27,7 @@
  */
 #define MIN_WORD_LEN  8
 
+#define MAX_PAGES 2048
 /* TYPE entry_t
  *    The type of one entry in the index.
  */
@@ -39,7 +40,7 @@ typedef struct entry {
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
     char *entry_word;
-    bool location[2048];
+    bool location[MAX_PAGES];
 } entry_t;
 
 /******************************************************************************
@@ -247,6 +248,10 @@ void entry_destroy(bag_elem_t e)
 
 void entry_print(bag_elem_t e)
 {
+    entry_t *this_entry = e;
+    printf("%s", this_entry -> entry_word);
+    int i;
+    for(i = 0; i < MAX_PAGES; i++) if(this_entry -> location[i]) printf(" %d,", i);
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.  How to print an individual entry will  //
     //  depend completely on how you defined type entry_t, but the final      //
