@@ -38,8 +38,6 @@ struct bag {
  *  Declarations of helper functions -- including full documentation.         *
  ******************************************************************************/
 
- // By tommy and oliver
-
 /* FUNCTION avl_destroy
  *    Free the memory allocated for the binary tree rooted at a given node.
  * Parameters and preconditions:
