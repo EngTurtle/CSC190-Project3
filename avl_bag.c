@@ -314,7 +314,7 @@ bag_elem_t avl_insert(avl_node_t **root, bag_elem_t elem,
                       int (*cmp)(bag_elem_t, bag_elem_t))
 {
     bag_elem_t inserted;
-
+    
     if (! *root) {
         if ((*root = avl_node_create(elem)))
             inserted = (*root)->elem;
@@ -345,7 +345,7 @@ bag_elem_t avl_insert(avl_node_t **root, bag_elem_t elem,
         /* No rebalancing necessary, but update height. */
         if (inserted)  avl_update_height(*root);
     }
-
+    
     return inserted;
 }
 
@@ -353,7 +353,7 @@ bag_elem_t avl_remove(avl_node_t **root, bag_elem_t elem,
                       int (*cmp)(bag_elem_t, bag_elem_t))
 {
     bag_elem_t removed;
-
+    
     if (! *root) {
         removed = NULL;
     } else if ((*cmp)(elem, (*root)->elem) < 0) {
@@ -389,14 +389,14 @@ bag_elem_t avl_remove(avl_node_t **root, bag_elem_t elem,
             free(old);
         }
     }
-
+    
     return removed;
 }
 
 bag_elem_t avl_remove_min(avl_node_t **root)
 {
     bag_elem_t min;
-
+    
     if ((*root)->left) {
         /* *root is not the minimum, keep going and rebalance if necessary. */
         min = avl_remove_min(&(*root)->left);
@@ -411,14 +411,14 @@ bag_elem_t avl_remove_min(avl_node_t **root)
         *root = (*root)->right;
         free(old);
     }
-
+    
     return min;
 }
 
 bag_elem_t avl_remove_max(avl_node_t **root)
 {
     bag_elem_t max;
-
+    
     if ((*root)->right) {
         /* *root is not the maximum, keep going and rebalance if necessary. */
         max = avl_remove_max(&(*root)->right);
@@ -433,7 +433,7 @@ bag_elem_t avl_remove_max(avl_node_t **root)
         *root = (*root)->left;
         free(old);
     }
-
+    
     return max;
 }
 
@@ -458,7 +458,7 @@ void avl_rotate_to_the_left(avl_node_t **parent)
     (*parent)->right = child->left;
     child->left = *parent;
     *parent = child;
-
+    
     /* Update heights. */
     avl_update_height(child->left);
     avl_update_height(child);
@@ -471,7 +471,7 @@ void avl_rotate_to_the_right(avl_node_t **parent)
     (*parent)->left = child->right;
     child->right = *parent;
     *parent = child;
-
+    
     /* Update heights. */
     avl_update_height(child->right);
     avl_update_height(child);
@@ -520,13 +520,13 @@ void avl_print(const avl_node_t *root, int depth, int indent,
 {
     if (root) {
         avl_print(root->right, depth + 1, indent, print);
-
+        
         /* Print each value followed by its depth, with INDENT spaces of
          * indentation for each level of depth in the tree. */
         printf("%*s", depth * indent, "");
         (*print)(root->elem);
         printf(" [%u]\n", root->height);
-
+        
         avl_print(root->left, depth + 1, indent, print);
     }
 }
