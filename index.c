@@ -38,6 +38,8 @@ typedef struct entry {
     //  and disadvantages of each, and make sure to include a brief comment   //
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
+    char *word;
+    bag location;
 } entry_t;
 
 /******************************************************************************
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
     int min_word_len = 0;
     bag_t *index;
     clock_t ticks;
-    
+
     /* First, check that there is a first command line argument and
      * that it is the name of a file that can be opened for reading. */
     if (argc <= 1 || ! (input = fopen(argv[1], "r"))) {
@@ -156,13 +158,13 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     /* If we get here, the file has been opened for reading. */
-    
+
     /* Next, check if there is a second command line argument to specify
      * a minimum word length. */
     if (argc < 3 || (min_word_len = (int) strtol(argv[2], NULL, 10)) <= 0)
         min_word_len = MIN_WORD_LEN;
     /* If we get here, the minimum word length has a positive value. */
-    
+
     /* Next, generate the index, close the input file (because we're done with
      * it at this point), and print timing data. */
     ticks = clock();
@@ -173,7 +175,7 @@ int main(int argc, char *argv[])
                     1000.0 * ticks / CLOCKS_PER_SEC);
     /* Timing data is printed on stderr so we can isolate it from the rest of
      * the output below, if desired. */
-    
+
     /* Finally, print the index on stdout and clean up: free the memory
      * allocated for each index entry, then the memory for the index itself. */
     if (index) {
@@ -181,7 +183,7 @@ int main(int argc, char *argv[])
         bag_traverse(index, entry_destroy);
         bag_destroy(index);
     }
-    
+
     return EXIT_SUCCESS;
     ////////////////////////////////////////////////////////////////////////////
     //  This function is still missing some code to compute the running time  //
@@ -192,7 +194,7 @@ int main(int argc, char *argv[])
 bag_t *generate_index(FILE *input, int min_word_len)
 {
     bag_t *index = bag_create(entry_cmp);
-    
+
     if (index) {
         char word[LINE_LENGTH] = "";
         unsigned page = 0;
@@ -207,7 +209,7 @@ bag_t *generate_index(FILE *input, int min_word_len)
             ////////////////////////////////////////////////////////////////////
         }
     }
-    
+
     return index;
 }
 
