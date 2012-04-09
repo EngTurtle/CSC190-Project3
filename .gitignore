@@ -1,2 +1,4 @@
 #project files
 *.cbp*
+bin/*
+obj/*
