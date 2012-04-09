@@ -40,11 +40,8 @@ typedef struct entry {
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
     char *entry_word;
-<<<<<<< HEAD
-    bool location[2048];
-=======
     bool location[MAX_PAGES];
->>>>>>> a759c6b8139f5a0551ceb5f38eb0403ca1785dbc
+
 } entry_t;
 
 /******************************************************************************
@@ -144,7 +141,7 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2);
  * Side-effects: none
  */
 static
-void entry_mod(bag_elem_t element, int page);
+void entry_mod(bag_elem_t *element, int page);
 
 /******************************************************************************
  *  Function definitions -- see above for documentation.                      *
@@ -302,4 +299,10 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
     entry_t *entry1 = e1, *entry2 = e2;
 
     return stricmp(entry1->entry_word, entry2->entry_word);
+}
+
+void entry_mod(bag_elem_t *element, int page)
+{
+    entry_t *mod = element;
+    mod -> location[page] = true;
 }
