@@ -38,7 +38,7 @@ typedef struct entry {
     //  and disadvantages of each, and make sure to include a brief comment   //
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
-    char *word;
+    char *entry_word;
     bool location[2048];
 } entry_t;
 
@@ -130,6 +130,17 @@ void entry_print(bag_elem_t e);
 static
 int entry_cmp(bag_elem_t e1, bag_elem_t e2);
 
+/*
+ * Function entry_mod
+ *      add the page number to the entry
+ * Parameters and preconditions:
+ *      entry != NULL: a point the the entry to be modified
+ *      page > 0: a page number to be added to the entry
+ * Side-effects: none
+ */
+static
+void entry_mod(bag_elem_t element, int page);
+
 /******************************************************************************
  *  Function definitions -- see above for documentation.                      *
  ******************************************************************************/
@@ -197,6 +208,7 @@ bag_t *generate_index(FILE *input, int min_word_len)
 
     if (index) {
         char word[LINE_LENGTH] = "";
+        entry_t new_word, *existing_entry;
         unsigned page = 0;
         while (get_word(input, word, &page)) {
             ////////////////////////////////////////////////////////////////////
@@ -208,12 +220,22 @@ bag_t *generate_index(FILE *input, int min_word_len)
             //          which case no new entry should be added.              //
             ////////////////////////////////////////////////////////////////////
 
+            new_word.entry_word = word;
+
             // if the length of the word is long enough
+            if(strlen(word) >= min_word_len)
+            {
+                existing_entry = bag_contains(index, new_word);
                 // if the word is already in index
+                if(existing_entry != NULL)
+                {
                     // add the location to the list of locations for that word
+
+                }
                 // if the word isn't in the index
                     // create the entry
                     // add the location
+            }
         }
     }
 
@@ -254,4 +276,7 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
     //  Write code for this function.  Again, how you do this will depend on  //
     //  how you defined type entry_t.                                         //
     ////////////////////////////////////////////////////////////////////////////
+    entry_t *entry1 = e1, *entry2 = e2;
+
+    return stricmp(entry1->entry_word, entry2->entry_word);
 }
