@@ -39,7 +39,7 @@ typedef struct entry {
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
     char *word;
-    bag location;
+    bool location[2048];
 } entry_t;
 
 /******************************************************************************
@@ -207,6 +207,13 @@ bag_t *generate_index(FILE *input, int min_word_len)
             //          page number are already in the index together, in     //
             //          which case no new entry should be added.              //
             ////////////////////////////////////////////////////////////////////
+
+            // if the length of the word is long enough
+                // if the word is already in index
+                    // add the location to the list of locations for that word
+                // if the word isn't in the index
+                    // create the entry
+                    // add the location
         }
     }
 
