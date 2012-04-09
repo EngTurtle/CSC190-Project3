@@ -38,7 +38,7 @@ typedef struct entry {
     //  and disadvantages of each, and make sure to include a brief comment   //
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
-    char *word;
+    char *entry_word;
     bool location[2048];
 } entry_t;
 
@@ -222,6 +222,10 @@ bag_t *generate_index(FILE *input, int min_word_len)
 
 bag_elem_t entry_create(const char *word, unsigned page)
 {
+    entry_t *new_entry = malloc(sizeof(entry_t));
+    new_entry -> entry_word = word;
+    new_entry -> location[page] = true;
+    return new_entry;
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.                                         //
     //  WARNING!  This function must make a _COPY_ of the string that it is   //
@@ -232,6 +236,9 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
 void entry_destroy(bag_elem_t e)
 {
+    entry_t *old_entry = e;
+    free(old_entry -> entry_word);
+    free(old_entry);
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.  Don't forget to free _ALL_ of the      //
     //  memory that was allocated for e, including memory to store the word.  //
