@@ -16,3 +16,12 @@
 	<stdbool.h>
 	<stdio.h>
 
+1334009051 source:/Users/tommypearson/Documents/Docs/School/CSC190/CSC190-Project3/index.c
+	<stdbool.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	"file_util.h"
+	"bag.h"
+
