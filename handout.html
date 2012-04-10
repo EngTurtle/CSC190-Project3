@@ -1,0 +1,298 @@
+
+<!-- saved from url=(0098)https://portal.utoronto.ca/bbcswebdav/courses/Winter-2012-CSC190H1-S-LEC0101.LEC0102/handout3.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><link type="text/css" rel="stylesheet" href="data:text/css,"></head><body><h1>CSC190H1S, Winter 2012<br>
+    Project #3: <em>Indexing</em></h1>
+
+<p>
+In this project, you will write code
+to generate an <em>index</em> for a text file.
+</p>
+
+
+<h2>Learning Objectives</h2>
+
+<p>
+By completing this project, you will:
+</p>
+<ul><li>
+    become comfortable writing code that uses linked tree structures
+    (in particular, self-balancing search trees);
+</li><li>
+    become comfortable working with a larger project
+    that contains multiple header and source files;
+</li><li>
+    gain some experience running an empirical comparison
+    of different data structures.
+</li></ul>
+
+
+<h2>Background</h2>
+
+<p>
+We want to generate an <em>index</em> for a text file:
+a list of all the words that appear in the file along with
+the page numbers where each word appears.
+To make sure the index is not too large, we specify
+a <em>minimum word length</em> for the index
+(every word whose length is <em>strictly shorter</em> than this minimum
+will be ignored).
+The general algorithm to generate the index is then the following:
+</p>
+<pre>    iterate over the words in the file (and their page number), and
+    for each one:
+        if the word length is at least the minimum:
+            add the current page number for this word
+    
+    print the list of words with their page numbers, sorted alphabetically
+</pre>
+<p>
+We will provide a library that allows you to process a text file
+word-by-word, and that also provides a page number for each word.
+You have to implement <strong>two different ways</strong>
+to maintain the list of words and their page numbers.
+For one, you will use an AVL tree.
+For the other, you will use a different kind of self-balancing tree
+called <em>PSB trees</em>, for "<em>Pitt's Self-Balancing</em> trees"...  :)
+</p>
+
+<p>
+A PSB tree is a BST where there is no explicit balancing information stored.
+Instead, every time you search for a value and find it at a certain node,
+you perform a <em>rotation operation</em> on that node and its parent.
+The idea is that values that are accessed frequently automatically end up
+closer to the root (where they can be found quickly), and
+values that are accessed rarely automatically end up closer to the leaves.
+(Note that PSB trees do <strong>not</strong> perform any rotations
+during insertion or removal, only during searches and
+only when the value we are searching for is found.)
+</p>
+
+<p>
+Once you have implemented both kinds of self-balancing trees,
+you will run experiments with various input text files,
+to try and determine which one seems better.
+(See below for the details of what we want you to do.)
+</p>
+
+
+<h2>What To Do</h2>
+
+<h3>Part I: using AVL trees</h3>
+
+<p>
+First, download the starter code from Blackboard.
+Read all of the code and, especially, the comments in these files.
+</p>
+
+<p>
+Next, create a <code>Code::Blocks</code> project that contains
+the files <code>index.c, avl_bag.c, bag.h, file_util.c, file_util.h</code>.
+Add code to the main file "<code>index.c</code>"
+(see the comments in the file for indications of what you need to do)
+and test your project.
+</p>
+
+<p>
+When you run the project with command line arguments
+"<code>alice.txt 12</code>", it should generate the following output:
+</p>
+<pre>    Multiplication: 5
+    Uglification: 40
+    accidentally: 50
+    affectionately: 36
+    circumstances: 15
+    consultation: 8
+    contemptuous: 45
+    contemptuously: 16, 28
+    contradicted: 18
+    conversation: 1, 7, 13, 16, 22, 27, 35, 37
+    conversations: 1
+    difficulties: 35
+    disappointment: 1
+    explanations: 44
+    extraordinary: 21, 29
+    frontispiece: 46
+    hippopotamus: 6
+    inquisitively: 6
+    interrupting: 30, 53
+    neighbouring: 54
+    nevertheless: 12
+    occasionally: 22
+    refreshments: 46
+    straightened: 34
+    straightening: 23
+    thoughtfully: 18, 28, 43, 44
+    thunderstorm: 38
+    triumphantly: 29, 53
+    uncomfortable: 8, 12, 26, 35
+    uncomfortably: 37
+</pre>
+<p>
+Notice how each page number is preceded by a space, with commas
+(<code>','</code>) between page numbers and a colon (<code>':'</code>)
+between each word and the list of page numbers.
+Make sure your code produces <strong>exactly this output format</strong>!
+Any deviation from this (including any additional messages printed
+by your code) will make our testing scripts fail!
+</p>
+
+<h3>Part II: implementing PSB trees</h3>
+
+<p>
+Once you get this working, create a second <code>Code::Blocks</code> project
+with the files <code>index.c, bag.h, file_util.c, file_util.h</code>, and
+a new source file "<code>psb_bag.c</code>".
+This file will implement the types and functions from <code>bag.h</code>
+using a "PSB tree" as described above.
+<em>Think carefully about the design of your code.</em>
+In particular, you should not need to make any changes to your code
+in <code>index.c</code> at this point.
+</p>
+
+<h3>Part III: comparing the implementations</h3>
+
+<p>
+Finally, write a comparison of the AVL tree data structure and
+the PSB tree data structure.
+Start by comparing the efficiency of both data structures,
+by running timing experiments for each one.
+Then compare and discuss all other aspects of the two data structures:
+ease of implementation, size of the code, <em>etc</em>.
+</p>
+
+<p>
+Write a detailed report with all of your conclusions in a separate
+text file named "<code>report.txt</code>".
+Your report should be at least a few dozen lines long,
+but no more than a few hundred lines long
+(with 60–80 characters per line).
+We want you to be reasonably thorough in your comparison,
+but reasonably concise in the way you write it up!
+</p>
+
+<h3>Submission</h3>
+
+<p>
+You must submit the following files on <a href="https://stanley.cdf.toronto.edu/markus/csc190-2012-01">MarkUs</a>:
+</p>
+<ul><li>
+    <code>index.c</code>
+</li><li>
+    <code>psb_bag.c</code>
+</li><li>
+    <code>report.txt</code>
+</li></ul>
+
+<h3>Important Notes</h3>
+
+<p>
+Make sure that all of your code is
+well-structured, well-designed, well-documented, and well formatted.
+(See the Style Guide for details.)
+</p>
+
+<p>
+<strong><em>WARNING!</em>
+    The file <code>report.txt</code> must be in plain text,
+    <em>NOT</em> a Word document!</strong>
+If you submit a Word document,
+<em>MarkUs</em> will be unable to display it and
+<strong>it will not be marked</strong>!
+</p>
+
+<p>
+There are many aspects of your code that are not fully specified in this
+handout. This is done on purpose, to allow you some freedom in the way you
+design your code. <em>Please document all of your design decisions
+carefully</em>. In other words, whenever you make a design decision,
+please write a detailed comment to explain your decision (<em>what</em>
+you've decided to do, and <em>why</em>).
+</p>
+
+<p>
+<strong>You are expected to follow all of the design and style principles
+you learned in CSC180!</strong>
+For more information and guidelines specific to C, please consult the
+documents posted on the Projects page of the course website (on Blackboard).
+</p>
+
+<h3>Partners</h3>
+
+<p>
+You are strongly encouraged to work in pairs on this project, but you are
+not required to do so if you prefer to work alone— however, in this
+case, you accept that you will receive <em>no</em> special consideration for
+having worked on this Project alone.
+</p>
+
+<p>
+Please follow the General Instructions posted on the Projects page on
+Blackboard.  In addition, <strong>please include a comment on the very first
+line of your submitted file with your ECF username (and that of your
+partner, if applicable)</strong>.
+</p>
+
+<h3>Testing and Marking</h3>
+
+<p>
+Our marking will focus on your report (worth roughly 25% of your grade)
+and the following five main aspects of your program (worth the remaining
+75% of your grade):
+</p>
+<ul><li>
+    <em>Design</em>: The algorithm implemented by your functions should be
+    clear and simple, as should the way your code manages information.
+    <strong>For this project, design will be the most important
+    component of your program (<em>i.e.</em>, worth the most).</strong>
+</li><li>
+    <em>Correctness</em>: Your functions should perform according to their
+    specifications (as described above and in the comments in the starter
+    code).
+    <strong>Note that correctness will NOT constitute the largest component of
+    your mark.</strong>
+</li><li>
+    <em>Style</em>: Your variables should be meaningful, your code
+    should be as clear and simple as possible, with good attempts to avoid
+    duplicated code, and you should make good (and appropriate use) of the
+    various features of C (<em>e.g.</em>, preprocessor constants).
+</li><li>
+    <em>Documentation</em>: Your functions should include "external"
+    comments to describe what they do (already provided for the functions in
+    the starter code, but you will have to supply them for any helper
+    functions you add), and you should have internal comments that describe
+    how your functions are implemented.
+</li><li>
+    <em>Formatting</em>: Your program should be formatted in a way that is
+    readable, and adheres to the basic C style guidelines posted on the
+    Projects page.
+</li></ul>
+
+<p>
+Please read the "style guide" posted on the main Projects page on Blackboard
+for more detailed information, and make sure to follow all of its
+recommendations!
+</p>
+
+<h2>Hints and Tips</h2>
+
+<ul><li>
+    Write out how your algorithms will work in English first (or whatever
+    language you prefer to speak), and use this as your internal function
+    comments.  Once you've figured out how you'd do it without a computer,
+    it'll be much easier to figure out how to write a solution in C.
+</li><li>
+    When working with linked data structures, <strong>draw lots of
+    pictures</strong> to help you figure out what's going on!  Use the same
+    style as in the lecture notes, with boxes for nodes and arrows for
+    pointers, and if that's not precise enough to help you understand how to
+    carry out a certain task, don't hesitate to draw a full memory
+    model— after all, that's exactly what it's for.
+</li><li>
+    Remember to <strong>submit early and submit often</strong>!
+    We strongly recommend that you submit <em>every time</em> that you
+    complete one more function, or that you fix one more bug, or that you
+    add any significant amount of code to your solution.  This guarantees
+    that we have a record of all of your work leading up to the deadline,
+    even in the event of last-minute submission problems.
+</li></ul>
+</body></html>
