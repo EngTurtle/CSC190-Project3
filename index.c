@@ -247,6 +247,8 @@ bag_t *generate_index(FILE *input, int min_word_len)
 
 bag_elem_t entry_create(const char *word, unsigned page)
 {
+    puts("created entry");
+
     entry_t *new_entry = malloc(sizeof(entry_t));
     new_entry -> entry_word = word;
     new_entry -> location[page] = true;
@@ -261,6 +263,8 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
 void entry_destroy(bag_elem_t e)
 {
+    puts("destroyed entry");
+
     entry_t *old_entry = e;
     free(old_entry -> entry_word);
     free(old_entry);
@@ -272,6 +276,8 @@ void entry_destroy(bag_elem_t e)
 
 void entry_print(bag_elem_t e)
 {
+    puts("printed entry");
+
     entry_t *this_entry = e;
     printf("%s: ", this_entry -> entry_word);
     int i,j;
@@ -299,11 +305,16 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
     ////////////////////////////////////////////////////////////////////////////
     entry_t *entry1 = e1, *entry2 = e2;
 
+    // checking what words are being compared. Interesting things are happening.
+    printf("comparing %s and %s\n", entry1->entry_word, entry2->entry_word);
+
     return stricmp(entry1->entry_word, entry2->entry_word);
 }
 
 void entry_mod(bag_elem_t *element, unsigned page)
 {
+    puts("modified entry");
+
     entry_t *mod = element;
     mod -> location[page] = true;
 }
