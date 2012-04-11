@@ -5,6 +5,7 @@ obj/*
 *.layout
 *.layout*
 *Project3*
+CSC190-Project3*
 
 # system files
 .DS_Store
