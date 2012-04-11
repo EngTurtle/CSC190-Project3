@@ -226,15 +226,18 @@ bag_t *generate_index(FILE *input, int min_word_len)
             // if the length of the word is long enough
             if(strlen(word) >= min_word_len)
             {
+                printf("looking at %s\n", word);
                 existing_entry = bag_contains(index, &new_word);
                 // if the word is already in index
-                if(existing_entry != NULL)
+                if(existing_entry == &new_word)
                 {
+                    printf("%s is in the index\n", word);
                     entry_mod(existing_entry, page); // add the location to the list of locations for that word
                 }
                 // if the word isn't in the index
                 else
                 {
+                    printf("%s isn't in the index\n", word);
                     bag_elem_t new_entry = entry_create(word, page); // create the entry
                     bag_insert(index, new_entry); // add the location
                 }
@@ -250,7 +253,12 @@ bag_elem_t entry_create(const char *word, unsigned page)
     puts("created entry");
 
     entry_t *new_entry = malloc(sizeof(entry_t));
-    new_entry -> entry_word = word;
+
+    char *copy_word = malloc((strlen(word) + 1) * sizeof(char));
+
+    strcpy(copy_word, word);
+
+    new_entry -> entry_word = copy_word;
     new_entry -> location[page] = true;
     return new_entry;
     ////////////////////////////////////////////////////////////////////////////
