@@ -72,7 +72,8 @@ bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
                         int (*cmp)(bag_elem_t, bag_elem_t),
                         int is_right, psb_node_t *parent,
                         int is_parent_right,
-                        psb_node_t *grandparent);
+                        psb_node_t *grandparent,
+                        struct bag *bag);
 
 /* FUNCTION psb_insert
  *    Add an element to a BST, given a pointer to its root.
@@ -215,7 +216,7 @@ void bag_traverse(const bag_t *bag, void (*fun)(bag_elem_t))
 bag_elem_t bag_contains(bag_t *bag, bag_elem_t elem)
 {
     return psb_contains(bag->root, elem, bag->cmp, 3, NULL,
-                        3, NULL);
+                        3, NULL, bag);
 }
 
 bag_elem_t bag_insert(bag_t *bag, bag_elem_t elem)
@@ -258,25 +259,36 @@ bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
                         int (*cmp)(bag_elem_t, bag_elem_t),
                         int is_right, psb_node_t *parent,
                         int is_parent_right,
-                        psb_node_t *grandparent)
+                        psb_node_t *grandparent,
+                        struct bag *bag)
 {
     if (! root)
         return NULL;
     else if ((*cmp)(elem, root->elem) < 0)
         return psb_contains(root->left, elem, cmp, 0, root,
-                             is_right, parent);
+                             is_right, parent, bag);
     else if ((*cmp)(elem, root->elem) > 0)
         return psb_contains(root->right, elem, cmp, 1, root,
-                             is_right, parent);
+                             is_right, parent, bag);
     else /* ((*cmp)(elem, root->elem) == 0) */
         if (is_right == 1) {
+            if (is_parent_right == 1){
+                 grandparent->right = root;
+            }
+            else if(! is_parent_right){
+                 grandparent->left = root;
+            }
+            else bag->root = root;
             psb_rotate_to_the_left(&parent);
-            if (is_parent_right) grandparent -> right = root;
-            else grandparent -> left = root;
         } else if (! is_right) {
+            if (is_parent_right == 1){
+                 grandparent->right = root;
+            }
+            else if(! is_parent_right){
+                 grandparent->left = root;
+            }
+            else bag->root = root;
             psb_rotate_to_the_right(&parent);
-            if (is_parent_right) grandparent -> right = root;
-            else grandparent -> left = root;
         }
         return root->elem;
 }
