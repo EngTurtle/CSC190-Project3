@@ -4,8 +4,9 @@ bin/*
 obj/*
 *.layout
 *.layout*
-*Project3*
 CSC190-Project3*
+*Project3.*
+*.depend
 
 # system files
 .DS_Store
