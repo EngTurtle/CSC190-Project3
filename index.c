@@ -183,7 +183,7 @@ int page_cmp(bag_elem_t e1, bag_elem_t e2);
 
 int main(int argc, char *argv[])
 {
-    FILE *input;
+    FILE *input, *log;
     int min_word_len = 0;
     bag_t *index;
     clock_t ticks;
@@ -201,11 +201,16 @@ int main(int argc, char *argv[])
     }
     /* If we get here, the file has been opened for reading. */
 
+
     /* Next, check if there is a second command line argument to specify
      * a minimum word length. */
     if (argc < 3 || (min_word_len = (int) strtol(argv[2], NULL, 10)) <= 0)
         min_word_len = MIN_WORD_LEN;
     /* If we get here, the minimum word length has a positive value. */
+
+    //creat or append to a runtime log file
+    log = fopen("runtime_log.txt", "a");
+    fprintf(log, "For %s and word %d characters and larger:\n", argv[1], min_word_len);
 
     /* Next, generate the index, close the input file (because we're done with
      * it at this point), and print timing data. */
@@ -213,7 +218,7 @@ int main(int argc, char *argv[])
     index = generate_index(input, min_word_len);
     ticks = clock() - ticks;
     fclose(input);
-    fprintf(stderr, "Elapsed time for generating the index: %gms\n",
+    fprintf(log, "Elapsed time for generating the index: %gms\n",
                     1000.0 * ticks / CLOCKS_PER_SEC);
     /* Timing data is printed on stderr so we can isolate it from the rest of
      * the output below, if desired. */
@@ -226,24 +231,21 @@ int main(int argc, char *argv[])
         ticks = clock();
         bag_traverse(index, entry_print);
         ticks = clock() - ticks;
-        fprintf(stderr, "Elapsed time for printing the index: %gms\n",
+        fprintf(log, "Elapsed time for printing the index: %gms\n",
                         1000.0 * ticks / CLOCKS_PER_SEC);
 
         // timing how long it takes to destroy the index
         ticks = clock();
         bag_traverse(index, entry_destroy);
-        ticks = clock() - ticks;
-        fprintf(stderr, "Elapsed time for destroy the index: %gms\n",
-                        1000.0 * ticks / CLOCKS_PER_SEC);
-
         bag_destroy(index);
+        ticks = clock() - ticks;
+        fprintf(log, "Elapsed time for destroy the index: %gms\n\n",
+                        1000.0 * ticks / CLOCKS_PER_SEC);
     }
 
+    fclose(log);
+
     return EXIT_SUCCESS;
-    ////////////////////////////////////////////////////////////////////////////
-    //  This function is still missing some code to compute the running time  //
-    //  of generating and printing the index.  This will be added later.      //
-    ////////////////////////////////////////////////////////////////////////////
 }
 
 bag_t *generate_index(FILE *input, int min_word_len)
