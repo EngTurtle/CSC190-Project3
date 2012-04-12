@@ -9,6 +9,7 @@ CSC190-Project3*
 *.depend
 *.gch
 *.out
+runtime_log*
 
 # system files
 .DS_Store
