@@ -42,7 +42,9 @@ typedef struct entry {
     bag_t *page_index;
 } entry_t;
 
-typedef unsigned page_entry;
+typedef int page_entry;
+
+size_t i = 0;
 
 /******************************************************************************
  *  Function declarations -- with full documentation.                         *
@@ -238,18 +240,15 @@ bag_t *generate_index(FILE *input, int min_word_len)
             // if the length of the word is long enough
             if(strlen(word) >= min_word_len)
             {
-                printf("looking at %s\n", word);
                 existing_entry = bag_contains(index, &new_word);
                 // if the word is already in index
-                if(existing_entry == &new_word)
+                if(existing_entry != NULL)
                 {
-                    printf("%s is in the index\n", word);
                     entry_mod(existing_entry, page); // add the location to the list of locations for that word
                 }
                 // if the word isn't in the index
                 else
                 {
-                    printf("%s isn't in the index\n", word);
                     bag_elem_t new_entry = entry_create(word, page); // create the entry
                     bag_insert(index, new_entry); // add the location
                 }
@@ -262,14 +261,17 @@ bag_t *generate_index(FILE *input, int min_word_len)
 
 bag_elem_t entry_create(const char *word, unsigned page)
 {
-    puts("created entry");
-
     entry_t *new_entry = malloc(sizeof(entry_t));
 
     new_entry -> entry_word = malloc((strlen(word) + 1) * sizeof(char));
     strcpy(new_entry -> entry_word, word);
 
-    new_entry->page_index = bag_create();
+    new_entry->page_index = bag_create(page_cmp);
+
+    page_entry *new_page = malloc(sizeof(page_entry));
+    *new_page = page;
+
+    bag_insert(new_entry->page_index, new_page);
     return new_entry;
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.                                         //
@@ -281,10 +283,9 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
 void entry_destroy(bag_elem_t e)
 {
-    puts("destroyed entry");
-
     entry_t *old_entry = e;
     free(old_entry -> entry_word);
+    bag_destroy(old_entry->page_index);
     free(old_entry);
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.  Don't forget to free _ALL_ of the      //
@@ -292,20 +293,24 @@ void entry_destroy(bag_elem_t e)
     ////////////////////////////////////////////////////////////////////////////
 }
 
+void page_print(bag_elem_t e)
+{
+    page_entry *page = e;
+    printf("%d", *page);
+    if(i != 1)
+    {
+        printf(", ");
+        i--;
+    }
+}
+
 void entry_print(bag_elem_t e)
 {
-    puts("printed entry");
-
     entry_t *this_entry = e;
     printf("%s: ", this_entry -> entry_word);
-    int i,j;
-    //print the first entry
-    for(i = 0; i < MAX_PAGES; i++){
-        if(this_entry -> location[i]) printf(", %d", i);
-        break;
-    }
-    //print remaining entries, with commas after previous page number. For proper formatiing purposes.
-    for(j = i; j < MAX_PAGES; i++) if(this_entry -> location[i]) printf(", %d", j);
+
+    i = bag_size(this_entry->page_index);
+    bag_traverse(this_entry->page_index, page_print);
     printf("\n");
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.  How to print an individual entry will  //
@@ -324,17 +329,22 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
     entry_t *entry1 = e1, *entry2 = e2;
 
     // checking what words are being compared. Interesting things are happening.
-    printf("comparing %s and %s\n", entry1->entry_word, entry2->entry_word);
 
-    return stricmp(entry1->entry_word, entry2->entry_word);
+    return strcmp(entry1->entry_word, entry2->entry_word);
 }
 
 void entry_mod(bag_elem_t *element, unsigned page)
 {
-    puts("modified entry");
 
     entry_t *mod = element;
-    mod -> location[page] = true;
+
+    page_entry *new_page = malloc(sizeof(page_entry));
+    *new_page = page;
+
+    bag_insert(mod->page_index, new_page);
 }
 
-
+int page_cmp(bag_elem_t e1, bag_elem_t e2)
+{
+    return *(page_entry*)e1 - *(page_entry*)e2;
+}
