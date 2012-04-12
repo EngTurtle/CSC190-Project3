@@ -64,11 +64,15 @@ void psb_traverse(const psb_node_t *root, void (*fun)(bag_elem_t));
  *    cmp != NULL: the comparison function to use for the search
  * Return value:
  *    elem, if the BST rooted at 'root' contains it; NULL otherwise
- * Side-effects:  none
+ * Side-effects:  If the element is found, a rotation is done about its parent
+ *    so that the the element moves closer to the root
  */
 static
 bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
-                        int (*cmp)(bag_elem_t, bag_elem_t));
+                        int (*cmp)(bag_elem_t, bag_elem_t),
+                        int is_right, psb_node_t *parent,
+                        int is_parent_right,
+                        psb_node_t *grandparent);
 
 /* FUNCTION psb_insert
  *    Add an element to a BST, given a pointer to its root.
@@ -128,44 +132,6 @@ bag_elem_t psb_remove_min(psb_node_t **root);
 static
 bag_elem_t psb_remove_max(psb_node_t **root);
 
-
-
-
-
-//DELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETE
-/* FUNCTION psb_rebalance_to_the_left
- *    Rebalance the subtree rooted at *root, given that its right subtree is too
- *    tall -- this involves performing either a single or a double rotation.
- * Parameters and preconditions:
- *    root != NULL: a pointer to the root of the tree to rebalance
- *                  (*root != NULL and (*root)->right != NULL)
- * Return value:  none
- * Side-effects:
- *    the subtree rooted at *root has been rebalanced, and the heights of each
- *    node involved have been updated appropriately
- */
-static
-void psb_rebalance_to_the_left(psb_node_t **root);
-
-/* FUNCTION psb_rebalance_to_the_right
- *    Rebalance the subtree rooted at *root, given that its left subtree is too
- *    tall -- this involves performing either a single or a double rotation.
- * Parameters and preconditions:
- *    root != NULL: a pointer to the root of the tree to rebalance
- *                  (*root != NULL and (*root)->left != NULL)
- * Return value:  none
- * Side-effects:
- *    the subtree rooted at *root has been rebalanced, and the heights of each
- *    node involved have been updated appropriately
- */
-static
-void psb_rebalance_to_the_right(psb_node_t **root);
-//DELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETE
-
-
-
-
-
 /* FUNCTION psb_rotate_to_the_left
  *    Perform a single rotation of *parent to the left -- the tree structure
  *    goes from    *parent         to          child
@@ -201,31 +167,6 @@ void psb_rotate_to_the_left(psb_node_t **parent);
  */
 static
 void psb_rotate_to_the_right(psb_node_t **parent);
-
-
-
-
-
-
-
-//DELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETE
-/* FUNCTION psb_update_height
- *    Update the height of a node (based on the heights of its children).
- * Parameters and preconditions:
- *    node != NULL: the node to update
- * Return value:  none
- * Side-effects:
- *    the height of node is updated
- */
-static
-void psb_update_height(psb_node_t *node);
-//DELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETEDELETE
-
-
-
-
-
-
 
 /* FUNCTION psb_node_create
  *    Create a new psb_node.
@@ -273,7 +214,8 @@ void bag_traverse(const bag_t *bag, void (*fun)(bag_elem_t))
 
 bag_elem_t bag_contains(bag_t *bag, bag_elem_t elem)
 {
-    return psb_contains(bag->root, elem, bag->cmp);
+    return psb_contains(bag->root, elem, bag->cmp, 3, NULL,
+                        3, NULL);
 }
 
 bag_elem_t bag_insert(bag_t *bag, bag_elem_t elem)
@@ -313,15 +255,29 @@ void psb_traverse(const psb_node_t *root, void (*fun)(bag_elem_t))
 }
 
 bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
-                        int (*cmp)(bag_elem_t, bag_elem_t))
+                        int (*cmp)(bag_elem_t, bag_elem_t),
+                        int is_right, psb_node_t *parent,
+                        int is_parent_right,
+                        psb_node_t *grandparent)
 {
     if (! root)
         return NULL;
     else if ((*cmp)(elem, root->elem) < 0)
-        return psb_contains(root->left, elem, cmp);
+        return psb_contains(root->left, elem, cmp, 0, root,
+                             is_right, parent);
     else if ((*cmp)(elem, root->elem) > 0)
-        return psb_contains(root->right, elem, cmp);
+        return psb_contains(root->right, elem, cmp, 1, root,
+                             is_right, parent);
     else /* ((*cmp)(elem, root->elem) == 0) */
+        if (is_right == 1) {
+            psb_rotate_to_the_left(&parent);
+            if (is_parent_right) grandparent -> right = root;
+            else grandparent -> left = root;
+        } else if (! is_right) {
+            psb_rotate_to_the_right(&parent);
+            if (is_parent_right) grandparent -> right = root;
+            else grandparent -> left = root;
+        }
         return root->elem;
 }
 
@@ -336,40 +292,14 @@ bag_elem_t psb_insert(psb_node_t **root, bag_elem_t elem,
         else
             inserted = NULL;
     } else if ((*cmp)(elem, (*root)->elem) < 0) {
-        if ((inserted = psb_insert(&(*root)->left, elem, cmp))) {
-            /* The tree is not rebalanced at this point */
-
-
-
-
-
-
-
-
-
-            if (HEIGHT((*root)->left) > HEIGHT((*root)->right) + 1)
-                psb_rebalance_to_the_right(root);
-            else
-                psb_update_height(*root);
-        }
+        (inserted = psb_insert(&(*root)->left, elem, cmp));
+            /* The tree does not get rebalanced at this point */
     } else if ((*cmp)(elem, (*root)->elem) > 0) {
-        if ((inserted = psb_insert(&(*root)->right, elem, cmp))) {
-            /* Check if the subtree needs rebalancing; update its height. */
-            if (HEIGHT((*root)->right) > HEIGHT((*root)->left) + 1)
-                psb_rebalance_to_the_left(root);
-            else
-                psb_update_height(*root);
-        }
+        (inserted = psb_insert(&(*root)->right, elem, cmp));
     } else { /* ((*cmp)(elem, (*root)->elem) == 0) */
-        /* Insert into the subtree with smaller height. */
-        if (HEIGHT((*root)->left) < HEIGHT((*root)->right))
-            inserted = psb_insert(&(*root)->left, elem, cmp);
-        else
-            inserted = psb_insert(&(*root)->right, elem, cmp);
-        /* No rebalancing necessary, but update height. */
-        if (inserted)  psb_update_height(*root);
+        /* Insert into the left subtree */
+        inserted = psb_insert(&(*root)->left, elem, cmp);
     }
-
     return inserted;
 }
 
@@ -381,31 +311,16 @@ bag_elem_t psb_remove(psb_node_t **root, bag_elem_t elem,
     if (! *root) {
         removed = NULL;
     } else if ((*cmp)(elem, (*root)->elem) < 0) {
-        if ((removed = psb_remove(&(*root)->left, elem, cmp))) {
-            /* Check if the subtree needs rebalancing; update its height. */
-            if (HEIGHT((*root)->left) + 1 < HEIGHT((*root)->right))
-                psb_rebalance_to_the_left(root);
-            else
-                psb_update_height(*root);
-        }
+        (removed = psb_remove(&(*root)->left, elem, cmp));
+            /* The subtree does not get rebalanced */
     } else if ((*cmp)(elem, (*root)->elem) > 0) {
-        if ((removed = psb_remove(&(*root)->right, elem, cmp))) {
-            /* Check if the subtree needs rebalancing; update its height. */
-            if (HEIGHT((*root)->right) + 1 < HEIGHT((*root)->left))
-                psb_rebalance_to_the_right(root);
-            else
-                psb_update_height(*root);
-        }
+        (removed = psb_remove(&(*root)->right, elem, cmp));
+            /* The subtree does not get rebalanced */
     } else { /* ((*cmp)(elem, (*root)->elem) == 0) */
         removed = (*root)->elem;
         if ((*root)->left && (*root)->right) {
-            /* Remove from the subtree with larger height. */
-            if (HEIGHT((*root)->left) > HEIGHT((*root)->right))
-                (*root)->elem = psb_remove_max(&(*root)->left);
-            else
-                (*root)->elem = psb_remove_min(&(*root)->right);
-            /* No rebalancing necessary, but update height. */
-            psb_update_height(*root);
+            /* Remove from the left subtree */
+            (*root)->elem = psb_remove_max(&(*root)->left);
         } else {
             /* Remove *root. */
             psb_node_t *old = *root;
@@ -422,12 +337,8 @@ bag_elem_t psb_remove_min(psb_node_t **root)
     bag_elem_t min;
 
     if ((*root)->left) {
-        /* *root is not the minimum, keep going and rebalance if necessary. */
+        /* *root is not the minimum, keep going */
         min = psb_remove_min(&(*root)->left);
-        if (HEIGHT((*root)->left) + 1 < HEIGHT((*root)->right))
-            psb_rebalance_to_the_left(root);
-        else
-            psb_update_height(*root);
     } else {
         /* Remove *root. */
         psb_node_t *old = *root;
@@ -446,10 +357,7 @@ bag_elem_t psb_remove_max(psb_node_t **root)
     if ((*root)->right) {
         /* *root is not the maximum, keep going and rebalance if necessary. */
         max = psb_remove_max(&(*root)->right);
-        if (HEIGHT((*root)->right) + 1 < HEIGHT((*root)->left))
-            psb_rebalance_to_the_right(root);
-        else
-            psb_update_height(*root);
+
     } else {
         /* Remove *root. */
         psb_node_t *old = *root;
@@ -461,20 +369,6 @@ bag_elem_t psb_remove_max(psb_node_t **root)
     return max;
 }
 
-void psb_rebalance_to_the_left(psb_node_t **root)
-{
-    if (HEIGHT((*root)->right->left) > HEIGHT((*root)->right->right))
-        psb_rotate_to_the_right(&(*root)->right);
-    psb_rotate_to_the_left(root);
-}
-
-void psb_rebalance_to_the_right(psb_node_t **root)
-{
-    if (HEIGHT((*root)->left->right) > HEIGHT((*root)->left->left))
-        psb_rotate_to_the_left(&(*root)->left);
-    psb_rotate_to_the_right(root);
-}
-
 void psb_rotate_to_the_left(psb_node_t **parent)
 {
     /* Rearrange pointers. */
@@ -482,10 +376,6 @@ void psb_rotate_to_the_left(psb_node_t **parent)
     (*parent)->right = child->left;
     child->left = *parent;
     *parent = child;
-
-    /* Update heights. */
-    psb_update_height(child->left);
-    psb_update_height(child);
 }
 
 void psb_rotate_to_the_right(psb_node_t **parent)
@@ -495,24 +385,14 @@ void psb_rotate_to_the_right(psb_node_t **parent)
     (*parent)->left = child->right;
     child->right = *parent;
     *parent = child;
-
-    /* Update heights. */
-    psb_update_height(child->right);
-    psb_update_height(child);
 }
 
-void psb_update_height(psb_node_t *node)
-{
-    node->height = 1 + ( HEIGHT(node->left) > HEIGHT(node->right) ?
-                         HEIGHT(node->left) : HEIGHT(node->right) );
-}
 
 psb_node_t *psb_node_create(bag_elem_t elem)
 {
     psb_node_t *node = malloc(sizeof(psb_node_t));
     if (node) {
         node->elem = elem;
-        node->height = 1;
         node->left = NULL;
         node->right = NULL;
     }
@@ -525,8 +405,7 @@ psb_node_t *psb_node_create(bag_elem_t elem)
 
 /* FUNCTION psb_print
  *    Print every value in the subtree rooted at root to stdout, in a "sideways
- *    tree" layout with the root at the given depth.  Print each node's element
- *    and height.
+ *    tree" layout with the root at the given depth.  Print each node's element.
  * Parameters and preconditions:
  *    root != NULL: the root of the subtree to print
  *    depth >= 0: the depth at which to print the root's value
@@ -549,7 +428,6 @@ void psb_print(const psb_node_t *root, int depth, int indent,
          * indentation for each level of depth in the tree. */
         printf("%*s", depth * indent, "");
         (*print)(root->elem);
-        printf(" [%u]\n", root->height);
 
         psb_print(root->left, depth + 1, indent, print);
     }

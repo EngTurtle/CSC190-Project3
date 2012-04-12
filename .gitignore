@@ -8,6 +8,7 @@ CSC190-Project3*
 *Project3.*
 *.depend
 *.gch
+*.out
 
 # system files
 .DS_Store
