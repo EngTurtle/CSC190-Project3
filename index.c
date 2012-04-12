@@ -28,22 +28,21 @@
 #define MIN_WORD_LEN  8
 
 /* TYPE entry_t
- *    The type of one entry in the index.
+ *    The type of one word in the word index.
  */
-typedef struct entry {
-    ////////////////////////////////////////////////////////////////////////////
-    //  Define a type that you will use to store information about words and  //
-    //  their page numbers in the index.  This is entirely up to you: think   //
-    //  carefully about different ways you could do this, and the advantages  //
-    //  and disadvantages of each, and make sure to include a brief comment   //
-    //  here to discuss your choice and your reasons for it.                  //
-    ////////////////////////////////////////////////////////////////////////////
+typedef struct entry
+{
     char  *entry_word;
     bag_t *page_index;
 } entry_t;
 
+/* Type page entry
+ *    The type of one page in the page index.
+ */
 typedef int page_entry;
 
+// A number to keep track of the number of pages printed in a line so
+// the formating is correct.
 size_t i = 0;
 
 /******************************************************************************
@@ -105,16 +104,23 @@ bag_elem_t entry_create(const char *word, unsigned page);
 static
 void entry_destroy(bag_elem_t e);
 
-////////////////////////////////////////////////////////////////////////////////
-//  Complete the documentation for the next two functions to provide more     //
-//  information about how entries are printed and compared -- the details     //
-//  will depend on how you store entries.                                     //
-////////////////////////////////////////////////////////////////////////////////
+/* Function page_print
+ *    print an page index entry (passed in as type bag_elem_t) to stdout.
+ * Parameters and preconditions:
+ *    e != NULL: an word index entry
+ *    e is a pointer to the page_entry type.
+ * Return value:  none
+ * Side-effects:
+ *    the entry is printed to stdout
+ */
+static
+void page_print(bag_elem_t e);
 
 /* FUNCTION entry_print
- *    Print an index entry (passed in as type bag_elem_t) to stdout.
+ *    Print an word index entry (passed in as type bag_elem_t) to stdout.
  * Parameters and preconditions:
- *    e != NULL: an index entry
+ *    e != NULL: an word index entry
+ *    e is a pointer to the entry_t type.
  * Return value:  none
  * Side-effects:
  *    the entry is printed to stdout
@@ -123,7 +129,7 @@ static
 void entry_print(bag_elem_t e);
 
 /* FUNCTION entry_cmp
- *    Compare two index entries (passed in as type bag_elem_t).
+ *    Compare two word index entries (passed in as type bag_elem_t).
  * Parameters and preconditions:
  *    e1 != NULL: the first entry to compare
  *    e2 != NULL: the second entry to compare
@@ -149,6 +155,7 @@ void entry_mod(bag_elem_t *element, unsigned page);
  * Parameters and preconditions:
  *    e1 != NULL: the first page to compare
  *    e2 != NULL: the second page to compare
+ *    e1 and e2 pointers to the page_entry type
  * Return value:
  *    < 0 if e1 < e2; > 0 if e1 > e2; == 0 if e1 == e2
  * Side-effects:  none
@@ -159,11 +166,6 @@ int page_cmp(bag_elem_t e1, bag_elem_t e2);
 /******************************************************************************
  *  Function definitions -- see above for documentation.                      *
  ******************************************************************************/
-
-////////////////////////////////////////////////////////////////////////////////
-//  You may make changes to main() as necessary to make it work with the way  //
-//  you defined type entry_t and the entry-related functions.                 //
-////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[])
 {
@@ -281,16 +283,19 @@ bag_elem_t entry_create(const char *word, unsigned page)
     ////////////////////////////////////////////////////////////////////////////
 }
 
+void page_destroy(bag_elem_t e)
+{
+    page_entry *old_page = e;
+    free(e);
+}
+
 void entry_destroy(bag_elem_t e)
 {
     entry_t *old_entry = e;
     free(old_entry -> entry_word);
+    bag_traverse(old_entry->page_index, page_destroy);
     bag_destroy(old_entry->page_index);
     free(old_entry);
-    ////////////////////////////////////////////////////////////////////////////
-    //  Write code for this function.  Don't forget to free _ALL_ of the      //
-    //  memory that was allocated for e, including memory to store the word.  //
-    ////////////////////////////////////////////////////////////////////////////
 }
 
 void page_print(bag_elem_t e)
@@ -306,18 +311,14 @@ void page_print(bag_elem_t e)
 
 void entry_print(bag_elem_t e)
 {
+    // Print the word
     entry_t *this_entry = e;
     printf("%s: ", this_entry -> entry_word);
 
     i = bag_size(this_entry->page_index);
     bag_traverse(this_entry->page_index, page_print);
+
     printf("\n");
-    ////////////////////////////////////////////////////////////////////////////
-    //  Write code for this function.  How to print an individual entry will  //
-    //  depend completely on how you defined type entry_t, but the final      //
-    //  output of printing every entry should follow the specification given  //
-    //  in the handout.                                                       //
-    ////////////////////////////////////////////////////////////////////////////
 }
 
 int entry_cmp(bag_elem_t e1, bag_elem_t e2)
