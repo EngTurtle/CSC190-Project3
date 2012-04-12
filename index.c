@@ -27,7 +27,6 @@
  */
 #define MIN_WORD_LEN  8
 
-#define MAX_PAGES 2048
 /* TYPE entry_t
  *    The type of one entry in the index.
  */
@@ -39,9 +38,11 @@ typedef struct entry {
     //  and disadvantages of each, and make sure to include a brief comment   //
     //  here to discuss your choice and your reasons for it.                  //
     ////////////////////////////////////////////////////////////////////////////
-    char *entry_word;
-    bool location[MAX_PAGES];
+    char  *entry_word;
+    bag_t *page_index;
 } entry_t;
+
+typedef unsigned page_entry;
 
 /******************************************************************************
  *  Function declarations -- with full documentation.                         *
@@ -131,8 +132,7 @@ void entry_print(bag_elem_t e);
 static
 int entry_cmp(bag_elem_t e1, bag_elem_t e2);
 
-/*
- * Function entry_mod
+/* Function entry_mod
  *      add the page number to the entry
  * Parameters and preconditions:
  *      entry != NULL: a point the the entry to be modified
@@ -141,6 +141,18 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2);
  */
 static
 void entry_mod(bag_elem_t *element, unsigned page);
+
+/* Function page_cmp
+ *    Compare two page entries (passed in as type bag_elem_t).
+ * Parameters and preconditions:
+ *    e1 != NULL: the first page to compare
+ *    e2 != NULL: the second page to compare
+ * Return value:
+ *    < 0 if e1 < e2; > 0 if e1 > e2; == 0 if e1 == e2
+ * Side-effects:  none
+ */
+static
+int page_cmp(bag_elem_t e1, bag_elem_t e2);
 
 /******************************************************************************
  *  Function definitions -- see above for documentation.                      *
@@ -254,12 +266,10 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
     entry_t *new_entry = malloc(sizeof(entry_t));
 
-    char *copy_word = malloc((strlen(word) + 1) * sizeof(char));
+    new_entry -> entry_word = malloc((strlen(word) + 1) * sizeof(char));
+    strcpy(new_entry -> entry_word, word);
 
-    strcpy(copy_word, word);
-
-    new_entry -> entry_word = copy_word;
-    new_entry -> location[page] = true;
+    new_entry->page_index = bag_create();
     return new_entry;
     ////////////////////////////////////////////////////////////////////////////
     //  Write code for this function.                                         //
@@ -326,3 +336,5 @@ void entry_mod(bag_elem_t *element, unsigned page)
     entry_t *mod = element;
     mod -> location[page] = true;
 }
+
+
