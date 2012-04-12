@@ -322,14 +322,7 @@ void entry_print(bag_elem_t e)
 
 int entry_cmp(bag_elem_t e1, bag_elem_t e2)
 {
-    ////////////////////////////////////////////////////////////////////////////
-    //  Write code for this function.  Again, how you do this will depend on  //
-    //  how you defined type entry_t.                                         //
-    ////////////////////////////////////////////////////////////////////////////
     entry_t *entry1 = e1, *entry2 = e2;
-
-    // checking what words are being compared. Interesting things are happening.
-
     return strcmp(entry1->entry_word, entry2->entry_word);
 }
 
@@ -341,6 +334,8 @@ void entry_mod(bag_elem_t *element, unsigned page)
     page_entry *new_page = malloc(sizeof(page_entry));
     *new_page = page;
 
+    // check if page is already in the index
+    if(!bag_contains(mod->page_index, new_page))
     bag_insert(mod->page_index, new_page);
 }
 
