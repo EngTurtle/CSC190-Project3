@@ -323,13 +323,13 @@ void entry_destroy(bag_elem_t e)
 void page_print(bag_elem_t e)
 {
     page_entry *page = e;
-    fprintf(stderr, "%d", *page);
+    fprintf(stdout, "%d", *page);
 
     // only print the comma and space if it's not the last
     // page in the list.
     if(i != 1)
     {
-        fprintf(stderr, ", ");
+        fprintf(stdout, ", ");
         i--;
     }
 }
@@ -338,13 +338,13 @@ void entry_print(bag_elem_t e)
 {
     // Print the word
     entry_t *this_entry = e;
-    fprintf(stderr, "%s: ", this_entry -> entry_word);
+    fprintf(stdout, "%s: ", this_entry -> entry_word);
 
     // Print the page index for that word
     i = bag_size(this_entry->page_index);
     bag_traverse(this_entry->page_index, page_print);
 
-    printf("\n");
+    fprintf(stdout,"\n");
 }
 
 int entry_cmp(bag_elem_t e1, bag_elem_t e2)
