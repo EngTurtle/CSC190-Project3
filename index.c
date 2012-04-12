@@ -221,8 +221,21 @@ int main(int argc, char *argv[])
     /* Finally, print the index on stdout and clean up: free the memory
      * allocated for each index entry, then the memory for the index itself. */
     if (index) {
+
+        // timing how long it takes to print the index
+        ticks = clock();
         bag_traverse(index, entry_print);
+        ticks = clock() - ticks;
+        fprintf(stderr, "Elapsed time for printing the index: %gms\n",
+                        1000.0 * ticks / CLOCKS_PER_SEC);
+
+        // timing how long it takes to destroy the index
+        ticks = clock();
         bag_traverse(index, entry_destroy);
+        ticks = clock() - ticks;
+        fprintf(stderr, "Elapsed time for destroy the index: %gms\n",
+                        1000.0 * ticks / CLOCKS_PER_SEC);
+
         bag_destroy(index);
     }
 
@@ -241,19 +254,10 @@ bag_t *generate_index(FILE *input, int min_word_len)
         char word[LINE_LENGTH] = "";
         entry_t new_word, *existing_entry;
         unsigned page = 0;
-        while (get_word(input, word, &page)) {
-            ////////////////////////////////////////////////////////////////////
-            //  Add code to perform the following tasks:                      //
-            //      1.  Compare the length of word to min_word_len.           //
-            //      2.  If word is long enough, add an entry in the index     //
-            //          for the current page number -- unless the word and    //
-            //          page number are already in the index together, in     //
-            //          which case no new entry should be added.              //
-            ////////////////////////////////////////////////////////////////////
-
+        while (get_word(input, word, &page))
+        {
             new_word.entry_word = word;
-
-            // if the length of the word is long enough
+            // check if the length of the word is long enough
             if(strlen(word) >= min_word_len)
             {
                 existing_entry = bag_contains(index, &new_word);
@@ -299,7 +303,6 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
 void page_destroy(bag_elem_t e)
 {
-    page_entry *old_page = e;
     free(e);
 }
 
