@@ -337,7 +337,16 @@ bag_elem_t psb_insert(psb_node_t **root, bag_elem_t elem,
             inserted = NULL;
     } else if ((*cmp)(elem, (*root)->elem) < 0) {
         if ((inserted = psb_insert(&(*root)->left, elem, cmp))) {
-            /* Check if the subtree needs rebalancing; update its height. */
+            /* The tree is not rebalanced at this point */
+
+
+
+
+
+
+
+
+
             if (HEIGHT((*root)->left) > HEIGHT((*root)->right) + 1)
                 psb_rebalance_to_the_right(root);
             else
