@@ -92,11 +92,25 @@ bag_t *generate_index(FILE *input, int min_word_len);
 static
 bag_elem_t entry_create(const char *word, unsigned page);
 
-/* FUNCTION entry_destroy
- *    Release the memory allocated for an index entry (passed in as type
+/* FUNCTION page_destroy
+ *    Release the memory allocated for an page index entry (passed in as type
  *    bag_elem_t).
  * Parameters and preconditions:
  *    e != NULL: an index entry
+ *    e is a pointer to the type page_entry
+ * Return value:  none
+ * Side-effects:
+ *    the memory allocated for e is freed
+ */
+static
+void page_destroy(bag_elem_t e);
+
+/* FUNCTION entry_destroy
+ *    Release the memory allocated for an word index entry (passed in as type
+ *    bag_elem_t).
+ * Parameters and preconditions:
+ *    e != NULL: an index entry
+ *    e is a pointer to the type entry_t
  * Return value:  none
  * Side-effects:
  *    the memory allocated for e is freed
@@ -140,15 +154,15 @@ void entry_print(bag_elem_t e);
 static
 int entry_cmp(bag_elem_t e1, bag_elem_t e2);
 
-/* Function entry_mod
+/* Function entry_add
  *      add the page number to the entry
  * Parameters and preconditions:
- *      entry != NULL: a point the the entry to be modified
+ *      entry != NULL: a point the the word entry to be modified
  *      page > 0: a page number to be added to the entry
  * Side-effects: none
  */
 static
-void entry_mod(bag_elem_t *element, unsigned page);
+void entry_add(bag_elem_t *element, unsigned page);
 
 /* Function page_cmp
  *    Compare two page entries (passed in as type bag_elem_t).
@@ -246,7 +260,7 @@ bag_t *generate_index(FILE *input, int min_word_len)
                 // if the word is already in index
                 if(existing_entry != NULL)
                 {
-                    entry_mod(existing_entry, page); // add the location to the list of locations for that word
+                    entry_add(existing_entry, page); // add the location to the list of locations for that word
                 }
                 // if the word isn't in the index
                 else
@@ -293,8 +307,11 @@ void entry_destroy(bag_elem_t e)
 {
     entry_t *old_entry = e;
     free(old_entry -> entry_word);
+
+    // empty and free the page index
     bag_traverse(old_entry->page_index, page_destroy);
     bag_destroy(old_entry->page_index);
+
     free(old_entry);
 }
 
@@ -302,6 +319,9 @@ void page_print(bag_elem_t e)
 {
     page_entry *page = e;
     printf("%d", *page);
+
+    // only print the comma and space if it's not the last
+    // page in the list.
     if(i != 1)
     {
         printf(", ");
@@ -315,6 +335,7 @@ void entry_print(bag_elem_t e)
     entry_t *this_entry = e;
     printf("%s: ", this_entry -> entry_word);
 
+    // Print the page index for that word
     i = bag_size(this_entry->page_index);
     bag_traverse(this_entry->page_index, page_print);
 
@@ -327,9 +348,8 @@ int entry_cmp(bag_elem_t e1, bag_elem_t e2)
     return strcmp(entry1->entry_word, entry2->entry_word);
 }
 
-void entry_mod(bag_elem_t *element, unsigned page)
+void entry_add(bag_elem_t *element, unsigned page)
 {
-
     entry_t *mod = element;
 
     page_entry *new_page = malloc(sizeof(page_entry));
