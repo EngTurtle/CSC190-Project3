@@ -1,1 +1,20 @@
-AVLÊvs PSB report by Tommy Person and Oliver LiangDuring runtime experiments with avl and psb trees, we found that the avl tree implementation was slightly faster than the psbimplementation for most of the run cases. There were only one or two random cases where psb was faster than avl, andwe believe this was due to random factors outside of our control. The difference in runtime is mostly because of ourimplementation of the page index for each word. As we are using page index bags inside of the word index bags, weincreased the amount of searching for elements that don't exist in the tree. And since there is no balancing in the psb treeif an element is not found, the unbalanced nature of the psb tree compared to the balanced avl tree cause the searches to bemuch slower in psb. Also of note during the testing, when we ran the dictionary athttp://www.math.sjsu.edu/~foster/dictionary.txtusing the psb tree and word lengths at 11 and below on a mac, the program crashed as the call stacks for the contains andinsert functions got too large. While the avl based program ran fine. We think this is due to the max depth of the recursionfor the contains function is equal to the max height of the tree being searched through, and the psb tree is much taller as it'sunbalanced.The amount of code required to implement the psb tree is less than the implementation of the AVL tree. The psb tree doesnot include height information, and therefore does not require height updating functions. It also does not perform anybalancing except in the contains function, which has been implemented as a simple single rotation. This means that it doesnot need the rebalancing functions. The change in the contains function is not very complex; the information on the parentand grandparent are passed down so that the single rotation can occur successfully. The only additional code required is afew more parameters and a few if statements and rotations in the contains function.
+AVLï¿½vs PSB report by Tommy Person and Oliver Liang
+During runtime experiments with avl and psb trees, we found that the avl tree implementation was slightly faster than the psb
+implementation for most of the run cases. There were only one or two random cases where psb was faster than avl, and
+we believe this was due to random factors outside of our control. The difference in runtime is mostly because of our
+implementation of the page index for each word. As we are using page index bags inside of the word index bags, we
+increased the amount of searching for elements that don't exist in the tree. And since there is no balancing in the psb tree
+if an element is not found, the unbalanced nature of the psb tree compared to the balanced avl tree cause the searches to be
+much slower in psb. Also of note during the testing, when we ran the dictionary at
+http://www.math.sjsu.edu/~foster/dictionary.txt
+using the psb tree and word lengths at 11 and below on a mac, the program crashed as the call stacks for the contains and
+insert functions got too large. While the avl based program ran fine. We think this is due to the max depth of the recursion
+for the contains function is equal to the max height of the tree being searched through, and the psb tree is much taller as it's
+unbalanced.
+The amount of code required to implement the psb tree is less than the implementation of the AVL tree. The psb tree does
+not include height information, and therefore does not require height updating functions. It also does not perform any
+balancing except in the contains function, which has been implemented as a simple single rotation. This means that it does
+not need the rebalancing functions. The change in the contains function is not very complex; the information on the parent
+and grandparent are passed down so that the single rotation can occur successfully. The only additional code required is a
+few more parameters and a few if statements and rotations in the contains function.
+The full repository for our project is at git://github.com/EngTurtle/CSC190-Project3.git
