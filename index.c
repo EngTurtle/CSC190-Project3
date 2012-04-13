@@ -295,12 +295,6 @@ bag_elem_t entry_create(const char *word, unsigned page)
 
     bag_insert(new_entry->page_index, new_page);
     return new_entry;
-    ////////////////////////////////////////////////////////////////////////////
-    //  Write code for this function.                                         //
-    //  WARNING!  This function must make a _COPY_ of the string that it is   //
-    //  given in argument 'word', i.e., it is necessary to allocate memory    //
-    //  and to copy the characters from word[].                               //
-    ////////////////////////////////////////////////////////////////////////////
 }
 
 void page_destroy(bag_elem_t e)
