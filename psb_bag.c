@@ -12,6 +12,10 @@
 
 #include "bag.h"
 
+#define RIGHT_CHILD 1
+#define LEFT_CHILD 0
+#define NO_ANCESTOR 2
+
 
 /* TYPE psb_node_t -- A node in an psb tree. */
 typedef struct psb_node {
@@ -62,6 +66,12 @@ void psb_traverse(const psb_node_t *root, void (*fun)(bag_elem_t));
  *    root: the root of the BST to search
  *    elem != NULL: the element to search for
  *    cmp != NULL: the comparison function to use for the search
+ *    is_right == NO_ANCESTOR (!=1 && !=0): a variable used in the recursive calls
+ *    parent == NULL: a variable used in the recursive calls
+ *    is_parent_right == NO_ANCESTOR (!=1 && !=0):
+ *        a variable used in the recursive calls
+ *    grandparent == NULL: a variable used in the recursive calls
+ *    bag != NULL: a pointer to the bag being searched
  * Return value:
  *    elem, if the BST rooted at 'root' contains it; NULL otherwise
  * Side-effects:  If the element is found, a rotation is done about its parent
@@ -215,8 +225,8 @@ void bag_traverse(const bag_t *bag, void (*fun)(bag_elem_t))
 
 bag_elem_t bag_contains(bag_t *bag, bag_elem_t elem)
 {
-    return psb_contains(bag->root, elem, bag->cmp, 3, NULL,
-                        3, NULL, bag);
+    return psb_contains(bag->root, elem, bag->cmp, NO_ANCESTOR,
+                        NULL, NO_ANCESTOR, NULL, bag);
 }
 
 bag_elem_t bag_insert(bag_t *bag, bag_elem_t elem)
@@ -255,6 +265,15 @@ void psb_traverse(const psb_node_t *root, void (*fun)(bag_elem_t))
     }
 }
 
+/* In order to perform a rotation within the contains function,
+ * information on the parent, and which child (left or right),
+ * need to be passed into the function. In order to 'catch' the
+ * rotation properly, information on the grandparent and which
+ * child the element is found in also need to be passed recursively.
+ * In the event that the element is at the second level, the rotation
+ * needs to be 'caught' by the root of the bag, which is why the bag
+ * is passed in as a parameter.
+ */
 bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
                         int (*cmp)(bag_elem_t, bag_elem_t),
                         int is_right, psb_node_t *parent,
@@ -265,31 +284,26 @@ bag_elem_t psb_contains(const psb_node_t *root, bag_elem_t elem,
     if (! root)
         return NULL;
     else if ((*cmp)(elem, root->elem) < 0)
-        return psb_contains(root->left, elem, cmp, 0, root,
-                             is_right, parent, bag);
+        return psb_contains(root->left, elem, cmp, LEFT_CHILD,
+                            root, is_right, parent, bag);
     else if ((*cmp)(elem, root->elem) > 0)
-        return psb_contains(root->right, elem, cmp, 1, root,
-                             is_right, parent, bag);
+        return psb_contains(root->right, elem, cmp, RIGHT_CHILD,
+                            root, is_right, parent, bag);
     else /* ((*cmp)(elem, root->elem) == 0) */
-        if (is_right == 1) {
-            if (is_parent_right == 1){
-                 grandparent->right = root;
-            }
-            else if(! is_parent_right){
-                 grandparent->left = root;
-            }
-            else bag->root = root;
-            psb_rotate_to_the_left(&parent);
-        } else if (! is_right) {
-            if (is_parent_right == 1){
-                 grandparent->right = root;
-            }
-            else if(! is_parent_right){
-                 grandparent->left = root;
-            }
-            else bag->root = root;
-            psb_rotate_to_the_right(&parent);
-        }
+        // Have the grandparent point to the root
+        if (is_parent_right == RIGHT_CHILD){
+            grandparent->right = root;
+        }else if(! is_parent_right){ //parent is a left child
+            grandparent->left = root;
+        /* The root is at the second level and has no grandparent.
+           the element must become the root of the entire tree.
+           Also handles the case of the element being at the root*/
+        }else bag->root = root;
+        /* Perform a rotation to move the element found closer
+           to the root */
+        if (is_right == RIGHT_CHILD) psb_rotate_to_the_left(&parent);
+        // If root is a left child
+        else if (! is_right) psb_rotate_to_the_right(&parent);
         return root->elem;
 }
 
