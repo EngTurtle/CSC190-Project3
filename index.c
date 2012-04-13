@@ -3,11 +3,6 @@
  * Author: Francois Pitt, March 2012.
  */
 
-////////////////////////////////////////////////////////////////////////////////
-//  NOTE:  This file is incomplete!  I have indicated where you need to add   //
-//  code using comment blocks formatted like this one.                        //
-////////////////////////////////////////////////////////////////////////////////
-
 /******************************************************************************
  *  Constants and types.                                                      *
  ******************************************************************************/
@@ -255,6 +250,7 @@ bag_t *generate_index(FILE *input, int min_word_len)
     if (index) {
         char word[LINE_LENGTH] = "";
         entry_t new_word, *existing_entry;
+        bag_elem_t new_entry;
         unsigned page = 0;
         while (get_word(input, word, &page))
         {
@@ -263,36 +259,36 @@ bag_t *generate_index(FILE *input, int min_word_len)
             if(strlen(word) >= min_word_len)
             {
                 existing_entry = bag_contains(index, &new_word);
-                // if the word is already in index
-                if(existing_entry != NULL)
+                if(existing_entry != NULL) // if the word is already in index
                 {
                     entry_add(existing_entry, page); // add the location to the list of locations for that word
                 }
-                // if the word isn't in the index
-                else
+                else // if the word isn't in the index
                 {
-                    bag_elem_t new_entry = entry_create(word, page); // create the entry
+                    new_entry = entry_create(word, page); // create the entry
                     bag_insert(index, new_entry); // add the location
                 }
             }
         }
     }
-
     return index;
 }
 
 bag_elem_t entry_create(const char *word, unsigned page)
 {
+    // Allocate the memory for the new entry
     entry_t *new_entry = malloc(sizeof(entry_t));
-
+    
+    // Copy the word into a new string and put it in the entry.
     new_entry -> entry_word = malloc((strlen(word) + 1) * sizeof(char));
     strcpy(new_entry -> entry_word, word);
 
+    // Create the page index bag to hold the page numbers.
     new_entry->page_index = bag_create(page_cmp);
-
     page_entry *new_page = malloc(sizeof(page_entry));
     *new_page = page;
-
+    
+    // add the page to the page index.
     bag_insert(new_entry->page_index, new_page);
     return new_entry;
 }
