@@ -1,4 +1,4 @@
-AVL�vs PSB report by Tommy Person and Oliver Liang
+AVL vs PSB report by Tommy Person and Oliver Liang
 During runtime experiments with avl and psb trees, we found that the avl tree implementation was slightly faster than the psb
 implementation for most of the run cases. There were only one or two random cases where psb was faster than avl, and
 we believe this was due to random factors outside of our control. The difference in runtime is mostly because of our
